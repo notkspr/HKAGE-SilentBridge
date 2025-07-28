@@ -1,5 +1,5 @@
 .emergency-content {
-  --background: #dc2626; /* Red background */
+  --background: var(--ion-color-danger); /* Red background */
   --color: white;
   --padding-start: 20px;
   --padding-end: 20px;
@@ -62,7 +62,7 @@
   --background: white !important;
   --background-activated: white !important;
   --background-hover: white !important;
-  --color: #dc2626 !important;
+  --color: var(--ion-color-danger) !important;
   --border-radius: 50% !important;
   --padding-start: 0;
   --padding-end: 0;
@@ -94,7 +94,7 @@
 
 .bell-icon {
   font-size: 6rem !important;
-  color: #dc2626 !important;
+  color: var(--ion-color-danger) !important;
 }
 
 @keyframes jiggle {
@@ -165,6 +165,6 @@
 
   .bell-icon {
     font-size: 5.5rem !important;
-    color: #dc2626 !important;
+    color: var(--ion-color-danger) !important;
   }
 }

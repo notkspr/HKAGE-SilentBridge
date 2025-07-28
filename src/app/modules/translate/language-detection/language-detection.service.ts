@@ -4,7 +4,7 @@ import {TranslationService} from '../translate.service';
 const OBSOLETE_LANGUAGE_CODES = {
   iw: 'he',
 };
-const DEFAULT_SPOKEN_LANGUAGE = 'en';
+const DEFAULT_SPOKEN_LANGUAGE = 'zh-HK';
 
 @Injectable({
   providedIn: 'root',

@@ -71,6 +71,10 @@ export class SuggestAlternativeText {
   static readonly type = '[Translate] Suggest Alternative Text';
 }
 
+export class TranslateToEnglish {
+  static readonly type = '[Translate] Translate Text to English';
+}
+
 export class DescribeSignWritingSign {
   static readonly type = '[Translate] Describe a Single SignWriting Sign';
 

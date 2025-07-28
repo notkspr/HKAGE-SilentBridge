@@ -15,6 +15,7 @@ import {
   SetSpokenLanguageText,
   ShareSignedLanguageVideo,
   SuggestAlternativeText,
+  TranslateToEnglish,
   UploadPoseFile,
 } from './translate.actions';
 import {TranslationService} from './translate.service';
@@ -49,6 +50,7 @@ export interface TranslateStateModel {
   detectedLanguage: string;
 
   spokenLanguageText: string;
+  translatedEnglishText?: string; // Chinese to English translation for sign language processing
   normalizedSpokenLanguageText?: string;
   spokenLanguageSentences: string[];
 
@@ -62,11 +64,12 @@ const initialState: TranslateStateModel = {
   spokenToSigned: true,
   inputMode: 'text',
 
-  spokenLanguage: 'en',
+  spokenLanguage: 'zh',
   signedLanguage: 'csl',
   detectedLanguage: null,
 
   spokenLanguageText: '',
+  translatedEnglishText: null,
   normalizedSpokenLanguageText: null,
   spokenLanguageSentences: [],
 
@@ -185,6 +188,15 @@ export class TranslateState implements NgxsOnInit {
     if (!language) {
       const {spokenLanguageText} = getState();
       await this.detectLanguage(spokenLanguageText, patchState);
+    } else {
+      // If switching to Chinese and we have text, trigger English translation
+      const {spokenLanguageText} = getState();
+      if ((language === 'zh' || language.startsWith('zh-')) && spokenLanguageText.trim()) {
+        dispatch(new TranslateToEnglish());
+      } else {
+        // Clear English translation if switching away from Chinese
+        patchState({translatedEnglishText: null});
+      }
     }
 
     dispatch([ChangeTranslation, SuggestAlternativeText]);
@@ -207,13 +219,20 @@ export class TranslateState implements NgxsOnInit {
     const {spokenLanguage, spokenToSigned} = getState();
     const trimmedText = text.trim();
 
-    patchState({spokenLanguageText: text, normalizedSpokenLanguageText: null});
+    patchState({spokenLanguageText: text, normalizedSpokenLanguageText: null, translatedEnglishText: null});
 
     if (!spokenToSigned) {
       return EMPTY;
     }
 
-    // Process the text normally
+    // Check if we need to translate to English first (for Chinese input)
+    if (spokenLanguage && (spokenLanguage === 'zh' || spokenLanguage.startsWith('zh-')) && trimmedText) {
+      dispatch(new TranslateToEnglish());
+      // Don't call processOriginalText immediately for Chinese - wait for translation to complete
+      return EMPTY;
+    }
+
+    // Process the text normally for non-Chinese languages
     return this.processOriginalText(trimmedText, spokenLanguage, patchState, dispatch);
   }
 
@@ -264,6 +283,42 @@ export class TranslateState implements NgxsOnInit {
     return this.service.normalizeSpokenLanguageText(spokenLanguage, trimmedText).pipe(
       filter(text => text !== trimmedText),
       tap(text => patchState({normalizedSpokenLanguageText: text}))
+    );
+  }
+
+  @Action(TranslateToEnglish, {cancelUncompleted: true})
+  translateToEnglish({patchState, getState, dispatch}: StateContext<TranslateStateModel>) {
+    const {spokenToSigned, spokenLanguageText, spokenLanguage} = getState();
+    const trimmedText = spokenLanguageText.trim();
+
+    if (!spokenToSigned || !trimmedText || !spokenLanguage) {
+      return EMPTY;
+    }
+
+    // Only translate if the source language is Chinese
+    if (!(spokenLanguage === 'zh' || spokenLanguage.startsWith('zh-'))) {
+      return EMPTY;
+    }
+
+    if ('navigator' in globalThis && !navigator.onLine) {
+      return EMPTY;
+    }
+
+    return this.service.translateTextToEnglish(trimmedText, spokenLanguage).pipe(
+      tap(englishText => {
+        patchState({translatedEnglishText: englishText});
+
+        // Now process the text with sentences and trigger sign language translation
+        const sentences = this.service.splitSpokenSentences(spokenLanguage, trimmedText);
+        patchState({spokenLanguageSentences: sentences});
+
+        // Trigger sign language translation after English translation is complete
+        dispatch(ChangeTranslation);
+      }),
+      catchError(error => {
+        console.error('Failed to translate to English:', error);
+        return EMPTY;
+      })
     );
   }
 
@@ -321,6 +376,7 @@ export class TranslateState implements NgxsOnInit {
       signedLanguage,
       detectedLanguage,
       spokenLanguageText,
+      translatedEnglishText,
       spokenLanguageSentences,
     } = getState();
     if (spokenToSigned) {
@@ -331,17 +387,24 @@ export class TranslateState implements NgxsOnInit {
         patchState({signedLanguagePose: null, signWriting: []});
       } else {
         const actualSpokenLanguage = spokenLanguage || detectedLanguage;
-        const path = this.service.translateSpokenToSigned(
-          trimmedSpokenLanguageText,
-          actualSpokenLanguage,
-          signedLanguage
-        );
+
+        // Use English translation for sign language generation if available (for Chinese input)
+        const textForSignLanguage = translatedEnglishText || trimmedSpokenLanguageText;
+        const languageForSignLanguage = translatedEnglishText ? 'en' : actualSpokenLanguage;
+
+        const path = this.service.translateSpokenToSigned(textForSignLanguage, languageForSignLanguage, signedLanguage);
         patchState({signedLanguagePose: path});
+
+        // For SignWriting, also use English translation if available
+        const sentencesForSignWriting = translatedEnglishText
+          ? this.service.splitSpokenSentences('en', translatedEnglishText)
+          : spokenLanguageSentences;
+
         return this.swService
           .translateSpokenToSignWriting(
-            trimmedSpokenLanguageText,
-            spokenLanguageSentences,
-            actualSpokenLanguage,
+            textForSignLanguage,
+            sentencesForSignWriting,
+            languageForSignLanguage,
             signedLanguage
           )
           .pipe(tap(({text}) => dispatch(new SetSignWritingText(text.split(' ')))));

@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {map, catchError} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 
 @Injectable({
@@ -201,6 +201,37 @@ export class TranslationService {
     return this.http
       .post<{result: {description: string}}>(url, {data: {fsw}})
       .pipe(map(response => response.result.description));
+  }
+
+  translateTextToEnglish(text: string, sourceLanguage: string): Observable<string> {
+    // If the source language is already English, return the text as is
+    if (sourceLanguage === 'en' || sourceLanguage.startsWith('en-')) {
+      return new Observable(subscriber => {
+        subscriber.next(text);
+        subscriber.complete();
+      });
+    }
+
+    // Use Google Translate API (same as used in i18n-fixer.js)
+    const encodedText = encodeURIComponent(text);
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLanguage}&tl=en&dt=t&q=${encodedText}`;
+
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        // Google Translate API returns an array structure: [[[translatedText, originalText, null, null]], ...]
+        // We need to extract the translated text from response[0][0][0]
+        if (response && response[0] && response[0][0] && response[0][0][0]) {
+          return response[0][0][0];
+        }
+        // Fallback to original text if translation fails
+        return text;
+      }),
+      catchError(error => {
+        console.error('Translation failed:', error);
+        // Return original text as fallback
+        return of(text);
+      })
+    );
   }
 
   translateSpokenToSigned(text: string, spokenLanguage: string, signedLanguage: string): string {
