@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {filter, map} from 'rxjs/operators';
-import {IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs} from '@ionic/angular/standalone';
+import {IonButton, IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs} from '@ionic/angular/standalone';
 import {home, person} from 'ionicons/icons';
 import {addIcons} from 'ionicons';
 
@@ -9,7 +9,7 @@ import {addIcons} from 'ionicons';
   selector: 'app-main',
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonButton],
 })
 export class MainComponent {
   private router = inject(Router);
@@ -20,5 +20,10 @@ export class MainComponent {
 
   constructor() {
     addIcons({home, person});
+  }
+
+  onEmergencyClick() {
+    // Navigate to emergency page
+    this.router.navigate(['/emergency']);
   }
 }

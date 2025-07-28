@@ -4,7 +4,11 @@
   </ion-buttons>
 
   <ion-title>
-    <ion-fab-button color="danger">
+    <ion-fab-button
+      color="primary"
+      (click)="onEmergencyClick()"
+      (touchend)="onEmergencyTouchEnd($event)"
+      [attr.aria-label]="'Emergency Help'">
       <ion-icon name="ellipse-outline" />
     </ion-fab-button>
   </ion-title>

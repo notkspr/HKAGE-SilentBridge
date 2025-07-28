@@ -9,9 +9,30 @@ ion-title {
   ion-fab-button {
     margin: auto;
     --box-shadow: none;
+    // Ensure button is clickable on iOS mobile web
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    touch-action: manipulation;
+    // iOS specific fixes
+    -webkit-user-select: none;
+    user-select: none;
+    // Ensure minimum touch target size for iOS
+    min-width: 44px;
+    min-height: 44px;
 
     ion-icon {
       font-size: 5em;
+      // Prevent icon from interfering with button clicks
+      pointer-events: none;
     }
   }
+}
+
+// iOS specific styles
+.ios ion-title ion-fab-button {
+  // Additional iOS-specific styling if needed
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  // Force hardware acceleration on iOS
+  will-change: transform;
 }

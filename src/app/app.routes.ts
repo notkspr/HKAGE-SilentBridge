@@ -45,5 +45,9 @@ export const routes: Routes = [
       {path: 'settings', loadChildren: () => import('./pages/settings/settings.routes').then(m => m.routes)},
     ],
   },
+  {
+    path: 'emergency',
+    loadComponent: () => import('./pages/emergency/emergency.component').then(m => m.EmergencyComponent),
+  },
   {path: '**', component: NotFoundComponent},
 ];

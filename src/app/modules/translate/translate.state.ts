@@ -19,7 +19,7 @@ import {
 } from './translate.actions';
 import {TranslationService} from './translate.service';
 import {SetVideo, StartCamera, StopVideo} from '../../core/modules/ngxs/store/video/video.actions';
-import {catchError, EMPTY, filter, Observable, of} from 'rxjs';
+import {catchError, EMPTY, filter, Observable, of, switchMap} from 'rxjs';
 import {PoseViewerSetting} from '../settings/settings.state';
 import {tap} from 'rxjs/operators';
 import {Capacitor} from '@capacitor/core';
@@ -63,7 +63,7 @@ const initialState: TranslateStateModel = {
   inputMode: 'text',
 
   spokenLanguage: 'en',
-  signedLanguage: 'ase',
+  signedLanguage: 'csl',
   detectedLanguage: null,
 
   spokenLanguageText: '',
@@ -200,32 +200,53 @@ export class TranslateState implements NgxsOnInit {
   }
 
   @Action(SetSpokenLanguageText)
-  async setSpokenLanguageText(
+  setSpokenLanguageText(
     {patchState, getState, dispatch}: StateContext<TranslateStateModel>,
     {text}: SetSpokenLanguageText
-  ): Promise<void> {
+  ): Observable<any> {
     const {spokenLanguage, spokenToSigned} = getState();
     const trimmedText = text.trim();
 
     patchState({spokenLanguageText: text, normalizedSpokenLanguageText: null});
 
     if (!spokenToSigned) {
-      return;
+      return EMPTY;
     }
 
+    // Process the text normally
+    return this.processOriginalText(trimmedText, spokenLanguage, patchState, dispatch);
+  }
+
+  private processOriginalText(
+    trimmedText: string,
+    spokenLanguage: string,
+    patchState: StateContext<TranslateStateModel>['patchState'],
+    dispatch: StateContext<TranslateStateModel>['dispatch']
+  ): Observable<any> {
     const detectLanguage = this.detectLanguage(trimmedText, patchState);
 
-    // Wait for language detection if language is not selected
-    if (!spokenLanguage) {
-      await detectLanguage;
-    }
+    // Create an observable that handles the async operations
+    return new Observable(subscriber => {
+      (async () => {
+        try {
+          // Wait for language detection if language is not selected
+          if (!spokenLanguage) {
+            await detectLanguage;
+          }
 
-    // Get spoken language
-    const {detectedLanguage} = getState();
-    const assumedSpokenLanguage = spokenLanguage || detectedLanguage;
-    patchState({spokenLanguageSentences: this.service.splitSpokenSentences(assumedSpokenLanguage, trimmedText)});
+          // Get spoken language from updated state
+          const {detectedLanguage} = this.store.selectSnapshot(state => state.translate);
+          const assumedSpokenLanguage = spokenLanguage || detectedLanguage;
+          patchState({spokenLanguageSentences: this.service.splitSpokenSentences(assumedSpokenLanguage, trimmedText)});
 
-    dispatch(ChangeTranslation);
+          dispatch(ChangeTranslation);
+          subscriber.next(null);
+          subscriber.complete();
+        } catch (error) {
+          subscriber.error(error);
+        }
+      })();
+    });
   }
 
   @Action(SuggestAlternativeText, {cancelUncompleted: true})

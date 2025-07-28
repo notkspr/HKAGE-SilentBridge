@@ -1,9 +1,60 @@
 :host {
-  display: flex;
+  display: block;
+  width: 100%;
+}
 
-  &.spoken-to-signed {
-    flex-direction: row-reverse;
+.custom-header {
+  background: var(--ion-color-primary, #3880ff);
+  color: white;
+  padding: 16px 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0;
+  color: white;
+}
+
+// Mobile-specific styling to ensure header visibility
+@media screen and (max-width: 599px) {
+  .custom-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 2000 !important;
+    background: var(--ion-color-primary, #3880ff) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 20px !important;
   }
+
+  .header-title {
+    font-size: 1.75rem !important;
+    color: white !important;
+    text-shadow: none !important;
+    font-weight: bold !important;
+  }
+
+  .language-controls {
+    margin-top: 80px; // Account for fixed header
+  }
+}
+
+.language-controls {
+  display: flex;
+}
+
+:host.spoken-to-signed .language-controls {
+  flex-direction: row-reverse;
 }
 
 app-language-selector {

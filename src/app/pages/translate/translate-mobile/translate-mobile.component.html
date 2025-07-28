@@ -1,10 +1,6 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <app-language-selectors />
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <app-language-selectors />
 
-<ion-content [fullscreen]="true">
   @if (spokenToSigned) {
     <app-signed-language-output />
   } @else {

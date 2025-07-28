@@ -1,0 +1,27 @@
+<ion-content class="emergency-content">
+  <div class="emergency-container">
+    <div class="emergency-header">
+      <h1>緊急求助</h1>
+      <p>按下響鈴圖示發送緊急求助訊息</p>
+    </div>
+
+    <div class="bell-container">
+      <ion-button
+        class="emergency-bell-button"
+        fill="solid"
+        size="large"
+        (click)="onEmergencyBellClick()"
+        aria-label="發送緊急求助訊息">
+        <ion-icon name="notifications" class="bell-icon"> </ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Footer with back button -->
+  <div class="emergency-footer">
+    <ion-button fill="clear" color="light" (click)="goBack()" class="back-button" aria-label="返回主頁">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      返回主頁
+    </ion-button>
+  </div>
+</ion-content>

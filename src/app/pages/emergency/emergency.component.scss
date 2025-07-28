@@ -1,0 +1,170 @@
+.emergency-content {
+  --background: #dc2626; /* Red background */
+  --color: white;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --padding-top: 20px;
+  --padding-bottom: 0; /* Remove bottom padding for footer */
+
+  height: 100vh;
+  position: relative;
+}
+
+.emergency-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: calc(100vh - 80px); /* Account for footer */
+  text-align: center;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.emergency-header {
+  margin-bottom: 60px;
+  margin-top: 40px;
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 1;
+}
+
+.emergency-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--ion-color-primary-contrast, white);
+  margin-bottom: 10px;
+}
+
+.emergency-header p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.bell-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+}
+
+.emergency-bell-button {
+  --background: white !important;
+  --background-activated: white !important;
+  --background-hover: white !important;
+  --color: #dc2626 !important;
+  --border-radius: 50% !important;
+  --padding-start: 0;
+  --padding-end: 0;
+  --border-width: 0;
+  --box-shadow: none;
+
+  width: 150px;
+  height: 150px;
+  font-size: 3rem;
+  animation: jiggle 1.5s infinite;
+  border: none !important;
+  background: white !important;
+  border-radius: 50% !important;
+
+  &:hover {
+    --background: white !important;
+    background: white !important;
+    border-radius: 50% !important;
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+  }
+
+  &:active {
+    --background: white !important;
+    background: white !important;
+    border-radius: 50% !important;
+  }
+}
+
+.bell-icon {
+  font-size: 6rem !important;
+  color: #dc2626 !important;
+}
+
+@keyframes jiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Emergency Footer */
+.emergency-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: #6b7280; /* Changed to grey */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-button {
+  --color: white;
+  --background: transparent;
+  font-size: 1.1rem;
+  font-weight: 500;
+
+  &:hover {
+    --background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Accessibility improvements */
+.emergency-bell-button:focus {
+  outline: 3px solid white;
+  outline-offset: 4px;
+}
+
+/* Responsive design */
+@media (max-height: 600px) {
+  .emergency-header {
+    margin-bottom: 20px;
+    top: 20px;
+  }
+
+  .bell-container {
+    margin: 0;
+  }
+
+  .emergency-bell-button {
+    width: 120px;
+    height: 120px;
+    border-radius: 50% !important;
+  }
+
+  .bell-icon {
+    font-size: 5.5rem !important;
+    color: #dc2626 !important;
+  }
+}
