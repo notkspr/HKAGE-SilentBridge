@@ -49,14 +49,14 @@ describe('TranslateComponent', () => {
     expect(a11y).toHaveNoViolations();
   });
 
-  it('language change should change title', async () => {
+  it('language change should set title to Silent Bridge', async () => {
     const transloco = TestBed.inject(TranslocoService);
 
     transloco.setActiveLang('he');
-    expect(document.title).toEqual('תרגום סימנים');
+    expect(document.title).toEqual('Silent Bridge');
 
     transloco.setActiveLang('en');
-    expect(document.title).toEqual('Sign Translate');
+    expect(document.title).toEqual('Silent Bridge');
   });
 
   // TODO test state

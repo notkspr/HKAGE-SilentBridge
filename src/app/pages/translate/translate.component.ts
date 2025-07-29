@@ -49,7 +49,7 @@ export class TranslateComponent extends BaseComponent implements OnInit {
     this.transloco.events$
       .pipe(
         tap(() => {
-          this.title.setTitle(this.transloco.translate('translate.title'));
+          this.title.setTitle('Silent Bridge');
           this.meta.updateTag(
             {
               name: 'description',
